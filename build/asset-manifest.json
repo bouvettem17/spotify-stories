@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/spotify-stories/static/css/main.073c9b0a.css",
+    "main.js": "/spotify-stories/static/js/main.e0e05e84.js",
+    "static/js/787.07ae5795.chunk.js": "/spotify-stories/static/js/787.07ae5795.chunk.js",
+    "static/media/LoginPageBackground.png": "/spotify-stories/static/media/LoginPageBackground.364b856f0efe1b34714b.png",
+    "index.html": "/spotify-stories/index.html",
+    "main.073c9b0a.css.map": "/spotify-stories/static/css/main.073c9b0a.css.map",
+    "main.e0e05e84.js.map": "/spotify-stories/static/js/main.e0e05e84.js.map",
+    "787.07ae5795.chunk.js.map": "/spotify-stories/static/js/787.07ae5795.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.073c9b0a.css",
+    "static/js/main.e0e05e84.js"
+  ]
+}

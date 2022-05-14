@@ -60,21 +60,21 @@ const clientSecret = 'f83a6a44a9064a97adea9fadd7adb246'
 var access_token = null;
 var refresh_token = null
 
-var redirectUri = 'http://localhost:3000/'
+var redirectUri = 'https://bouvettem17.github.io/spotify-stories/'
 
 
 const LoginPage = () => {
   const dispatch = useDispatch()
 
   const requestAuthorization = () => {
-    let url = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=http://localhost:3000/&show_dialog=true&scope=user-top-read`
+    let url = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}/&show_dialog=true&scope=user-top-read`
     window.location.href = url
   }
 
   function fetchAccessToken(code) {
     let body = "grant_type=authorization_code";
     body += "&code=" + code;
-    body += "&redirect_uri=" + encodeURI('http://localhost:3000/');
+    body += "&redirect_uri=" + encodeURI('https://bouvettem17.github.io/spotify-stories/');
     body += "&client_id=" + clientId;
     body += "&client_secret=" + clientSecret;
     callAuthorizationApi(body);
