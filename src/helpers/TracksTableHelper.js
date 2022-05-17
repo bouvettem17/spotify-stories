@@ -70,7 +70,6 @@ export const artistsNameFormatting = (artists) => {
     return artists[0];
   } else {
     let returnString = "";
-    console.log(artists.length);
     artists.map((artist, idx) => {
       if (idx < artists.length - 1) {
         returnString += artist + ", ";
