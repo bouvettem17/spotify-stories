@@ -58,7 +58,7 @@ const clientSecret = "f83a6a44a9064a97adea9fadd7adb246";
 var access_token = null;
 var refresh_token = null;
 
-var redirectUri = "https://bouvettem17.github.io/spotify-stories/";
+var redirectUri = "http://localhost:3000/";
 
 const LoginPage = () => {
   const dispatch = useDispatch();

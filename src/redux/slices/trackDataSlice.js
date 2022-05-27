@@ -71,15 +71,15 @@ export const makePlaylist = createAsyncThunk(
   "user/playlist/create",
   async (requestData) => {
     let token = localStorage.getItem("access_token");
-    let { userId, value } = requestData;
+    let { userId, imageIndex } = requestData;
     let name = "";
     let description = "";
 
-    if (value === 0) {
+    if (imageIndex === 0) {
       name = "Your Monthly Top Tracks";
       description =
         "Enjoy a playlist composed of your top songs from the last month! (Courtesy of Spotify Stories)";
-    } else if (value === 1) {
+    } else if (imageIndex === 1) {
       name = "Your Six Month's Top Tracks";
       description =
         "Enjoy a playlist composed of your top songs from the last six months! (Courtesy of Spotify Stories)";
@@ -226,14 +226,13 @@ export const trackDataSlice = createSlice({
       state.playlistId = action.payload.id;
     },
     [makePlaylist.rejected]: (state) => {
-      state.playListCreationStatus = "failed";
+      state.playlistCreationStatus = "failed";
     },
     [addSongsToPlaylist.pending]: (state) => {
       state.addSongsStatus = "loading";
     },
     [addSongsToPlaylist.fulfilled]: (state, action) => {
       state.addSongsStatus = "success";
-      state.playListCreationStatus = "";
       state.playlistId = "";
     },
     [addSongsToPlaylist.rejected]: (state) => {

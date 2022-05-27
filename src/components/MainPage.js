@@ -1,15 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Typography from "@material-ui/core/Typography";
 import Box from "@mui/material/Box";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserProfile, logOut } from "../redux/slices/userSlice";
+import "react-toastify/dist/ReactToastify.css"
 import {
-  AppBar,
   Grid,
   StylesProvider,
-  Tab,
-  Tabs,
   useTheme,
 } from "@material-ui/core";
 import {
@@ -19,9 +17,9 @@ import {
   makePlaylist,
   addSongsToPlaylist,
 } from "../redux/slices/trackDataSlice";
-import SwipeableViews from "react-swipeable-views/lib/SwipeableViews";
 import { TabPanel, artistsNameFormatting } from "../helpers/TracksTableHelper";
 import { GreenButton } from "./LoginPage";
+import { ToastContainer, toast} from 'react-toastify';
 
 const StyledWrapper = styled.div`
   display: flex;
@@ -33,12 +31,13 @@ const StyledWrapper = styled.div`
 
 const CustomGrid = styled(Grid)`
   background-color: black;
-  padding-top: 40px;
 `;
 
 const CustomGridItem = styled(Grid)`
-  min-height: 400px;
+  min-height: 200px;
   color: white;
+  padding-top: 40px;
+  padding-bottom: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -50,6 +49,7 @@ const WelcomeTitle = styled(Typography)`
   font-family: "Montserrat", sans-serif;
   font-weight: 550;
   padding-top: 40px;
+  padding-bottom: 50px;
   background-color: black;
 `;
 
@@ -58,7 +58,6 @@ const TopDescriptionText = styled(Typography)`
   font-family: "Montserrat", sans-serif;
   font-weight: 400;
   font-size: 30px;
-  padding-bottom: 40px;
 `;
 
 const TopDescriptionData = styled(Typography)`
@@ -81,38 +80,17 @@ const CustomLargeAlbumCoverImg = styled.img`
   border-radius: 30px;
 `;
 
-const CustomBoxForDivider = styled(Box)`
-  border-top: 2px solid white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 40px;
-`;
 const TableBox = styled(Box)`
   padding-top: 40px;
 `;
 
-const CustomTabs = styled(Tabs)`
-  background-color: black;
-  text-color: rgb(176, 38, 255);
-  & .PrivateTabIndicator-root-1 {
-    background-color: rgb(176, 38, 255) !important;
-  }
-`;
 
-const CustomTab = styled(Tab)`
-  color: rgb(176, 38, 255);
-  font-family: "Montserrat", sans-serif;
-  font-weight: 600;
-  font-size: 18px;
-`;
+const AlbumWrapper = styled.div`
+    transform: ${props => props.active ? "scale(1.1)" : "scale(0.5)"};
+    transition: transform 300ms;
+    opacity: ${props => props.active ? 1 : 0.5}
 
-function a11yProps(index) {
-  return {
-    id: `full-width-tab-${index}`,
-    "aria-controls": `full-width-tabpanel-${index}`,
-  };
-}
+`
 
 const MainPage = () => {
   const topMonthTracks = useSelector(
@@ -143,19 +121,16 @@ const MainPage = () => {
   const playListCreationStatus = useSelector(
     (state) => state.trackData.playlistCreationStatus
   );
+  const addSongsStatus = useSelector(
+    (state) => state.trackData.addSongsStatus
+  )
+
   const createdPlayListId = useSelector((state) => state.trackData.playlistId);
   const userId = useSelector((state) => state.user.userProfile.userId);
-  const [value, setValue] = React.useState(0);
   const theme = useTheme();
   const dispatch = useDispatch();
 
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
 
-  const handleChangeIndex = (index) => {
-    setValue(index);
-  };
 
   useEffect(() => {
     if (
@@ -179,16 +154,40 @@ const MainPage = () => {
     if (playListCreationStatus === "success") {
       let songUris = [];
       const playlistId = createdPlayListId;
-      if (value === 0) {
+      if (imageIndex === 0) {
         songUris = topMonthTracks.map((song, idx) => song.uri);
-      } else if (value === 1) {
+      } else if (imageIndex === 1) {
         songUris = topSixMonthTracks.map((song, idx) => song.uri);
       } else {
         songUris = topAllTimeTracks.map((song, idx) => song.uri);
       }
       dispatch(addSongsToPlaylist({ playlistId, songUris }));
+    }else if (playListCreationStatus === "failed") {
+      toast.warn("This site is still in development mode, contact creator for playlist creation functionality", {
+        position: "bottom-left",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined
+      })
     }
   }, [playListCreationStatus]);
+
+  useEffect(() => {
+    if (addSongsStatus === 'success') {
+      toast.success("Your playlist is created. Check your Spotify!", {
+        position: "bottom-left",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined
+      }) 
+    }
+  }, [addSongsStatus])
 
   const artistsForTopChartsMonth = artistsNameFormatting(topMonthTrack.artists);
   const artistsForTopChartsSixMonth = artistsNameFormatting(
@@ -198,6 +197,9 @@ const MainPage = () => {
     topAllTimeTrack.artists
   );
 
+
+  const [imageIndex, setImageIndex] = useState(1)
+
   return (
     <>
       <StylesProvider injectFirst>
@@ -205,122 +207,111 @@ const MainPage = () => {
           <WelcomeTitle variant="h1">Your Top Tracks</WelcomeTitle>
           <Box sx={{ bgcolor: "black", width: "60%" }}>
             <CustomGrid container>
-              <CustomGridItem
-                item
-                style={{ borderBottom: "2px solid white" }}
-                xs={6}
-              >
-                <TopDescriptionText variant="h6">
-                  Your Top Track of the Last Month is:
-                </TopDescriptionText>
-                <TopDescriptionData variant="h6">
-                  {topMonthTrack.name}
-                </TopDescriptionData>
-                <TopDescriptionArtist variant="h6">
-                  {artistsForTopChartsMonth}
-                </TopDescriptionArtist>
+              <CustomGridItem item xs={4}>
+                <AlbumWrapper active={imageIndex === 0}>
+                  <CustomLargeAlbumCoverImg onClick={() => setImageIndex(0)} src={topMonthTrack.albumImgUrl} />
+                  <TopDescriptionText variant="h6">
+                    Month
+                  </TopDescriptionText>
+                </AlbumWrapper>
               </CustomGridItem>
-              <CustomGridItem
-                item
-                style={{ borderBottom: "2px solid white" }}
-                xs={6}
-              >
-                <CustomLargeAlbumCoverImg src={topMonthTrack.albumImgUrl} />
+              <CustomGridItem item xs={4}>
+                <AlbumWrapper active={imageIndex === 1}>
+                  <CustomLargeAlbumCoverImg onClick={() => setImageIndex(1)} src={topSixMonthTrack.albumImgUrl} />
+                  <TopDescriptionText variant="h6">
+                    Six Months
+                  </TopDescriptionText>
+                </AlbumWrapper>
               </CustomGridItem>
-              <CustomGridItem
-                item
-                style={{ borderBottom: "2px solid white" }}
-                xs={6}
-              >
-                <TopDescriptionText variant="h6">
-                  Your Top Track of the Last 6 Months is:
-                </TopDescriptionText>
-                <TopDescriptionData variant="h6">
-                  {topSixMonthTrack.name}
-                </TopDescriptionData>
-                <TopDescriptionArtist variant="h6">
-                  {artistsForTopChartsSixMonth}
-                </TopDescriptionArtist>
-              </CustomGridItem>
-              <CustomGridItem
-                item
-                style={{ borderBottom: "2px solid white" }}
-                xs={6}
-              >
-                <CustomLargeAlbumCoverImg src={topSixMonthTrack.albumImgUrl} />
-              </CustomGridItem>
-              <CustomGridItem item xs={6}>
-                <TopDescriptionText variant="h6">
-                  Your Top Track of All Time is:
-                </TopDescriptionText>
-                <TopDescriptionData variant="h6">
-                  {topAllTimeTrack.name}
-                </TopDescriptionData>
-                <TopDescriptionArtist variant="h6">
-                  {artistsForTopChartsAllTime}
-                </TopDescriptionArtist>
-              </CustomGridItem>
-              <CustomGridItem item xs={6}>
-                <CustomLargeAlbumCoverImg src={topAllTimeTrack.albumImgUrl} />
+              <CustomGridItem item xs={4}>
+                <AlbumWrapper active={imageIndex === 2}>
+                  <CustomLargeAlbumCoverImg onClick={() => setImageIndex(2)} src={topAllTimeTrack.albumImgUrl} />
+                  <TopDescriptionText variant="h6">
+                    All Time
+                  </TopDescriptionText>
+                </AlbumWrapper>
               </CustomGridItem>
             </CustomGrid>
-          </Box>
-          <CustomBoxForDivider sx={{ bgcolor: "black", width: "100%" }}>
-            <WelcomeTitle variant="h1">Your Leaderboard</WelcomeTitle>
-            <TableBox sx={{ bgcolor: "black", width: "60%" }}>
-              <AppBar position="static">
-                <CustomTabs
-                  value={value}
-                  onChange={handleChange}
-                  indicatorColor="primary"
-                  textColor="inherit"
-                  variant="fullWidth"
-                  aria-label="full width tabs example"
+            <CustomGrid container>
+              {imageIndex === 0 ?
+                <CustomGridItem
+                  item
+                  xs={12}
                 >
-                  <CustomTab label="Last Month" {...a11yProps(0)} />
-                  <CustomTab label="Last 6 Months" {...a11yProps(1)} />
-                  <CustomTab label="All Time" {...a11yProps(2)} />
-                </CustomTabs>
-              </AppBar>
-              <SwipeableViews
-                axis={theme.direction === "rtl" ? "x-reverse" : "x"}
-                index={value}
-                onChangeIndex={handleChangeIndex}
-              >
+                  <TopDescriptionText variant="h6">
+                    Your Top Track of the Last Month
+                  </TopDescriptionText>
+                  <TopDescriptionData variant="h6">
+                    {topMonthTrack.name}
+                  </TopDescriptionData>
+                  <TopDescriptionArtist variant="h6">
+                    {artistsForTopChartsMonth}
+                  </TopDescriptionArtist>
+                </CustomGridItem> :
+                imageIndex === 1 ?
+                  <CustomGridItem
+                    item
+                    xs={12}
+                  >
+                    <TopDescriptionText variant="h6">
+                      Your Top Track of the Last 6 Months
+                    </TopDescriptionText>
+                    <TopDescriptionData variant="h6">
+                      {topSixMonthTrack.name}
+                    </TopDescriptionData>
+                    <TopDescriptionArtist variant="h6">
+                      {artistsForTopChartsSixMonth}
+                    </TopDescriptionArtist>
+                  </CustomGridItem> :
+                  <CustomGridItem item xs={12}>
+                    <TopDescriptionText variant="h6">
+                      Your Top Track of All Time
+                    </TopDescriptionText>
+                    <TopDescriptionData variant="h6">
+                      {topAllTimeTrack.name}
+                    </TopDescriptionData>
+                    <TopDescriptionArtist variant="h6">
+                      {artistsForTopChartsAllTime}
+                    </TopDescriptionArtist>
+                  </CustomGridItem>
+              }
+            </CustomGrid>
+          </Box>
+            <WelcomeTitle variant="h1">Your {imageIndex === 0 ? "Monthly" : imageIndex === 1 ? "Six Month" : "All Time"} Leaderboard</WelcomeTitle>
+            <GreenButton
+              onClick={() => dispatch(makePlaylist({ userId, imageIndex }))}
+            >
+              Make Playlist
+            </GreenButton>
+            <TableBox sx={{ bgcolor: "black", width: "60%" }}>
                 <TabPanel
-                  value={value}
+                  value={imageIndex}
                   songs={topMonthTracks}
                   index={0}
                   dir={theme.direction}
                 >
-                  {value}
+                  {imageIndex}
                 </TabPanel>
                 <TabPanel
-                  value={value}
+                  value={imageIndex}
                   songs={topSixMonthTracks}
                   index={1}
                   dir={theme.direction}
                 >
-                  {value}
+                  {imageIndex}
                 </TabPanel>
                 <TabPanel
-                  value={value}
+                  value={imageIndex}
                   songs={topAllTimeTracks}
                   index={2}
                   dir={theme.direction}
                 >
-                  {value}
+                  {imageIndex}
                 </TabPanel>
-              </SwipeableViews>
             </TableBox>
-            <GreenButton
-              onClick={() => dispatch(makePlaylist({ userId, value }))}
-            >
-              Make Playlist
-            </GreenButton>
-          </CustomBoxForDivider>
         </StyledWrapper>
       </StylesProvider>
+      <ToastContainer/>
     </>
   );
 };

@@ -4,10 +4,13 @@ import LoginPage from "./components/LoginPage";
 import LoadingSpinnerPage from "./components/LoadingSpinnerPage";
 import { useSelector } from "react-redux";
 import Navbar from "./components/Navbar";
+import {ToastContainer, toast} from "react-toastify"
+
 
 function App() {
   const loggedIn = useSelector((state) => state.user.loggedIn);
   const isLoading = useSelector((state) => state.user.loggedLoading);
+
 
   return (
     <div className="App">
